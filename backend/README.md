@@ -1,6 +1,6 @@
 # Backend - ASP.NET Core API
 
-**Technical details**: See `backend/AGENTS.md` for implementation patterns.
+**AI Assistance**: See `.github/skills/writing-csharp-code/SKILL.md` for coding patterns.
 
 ## Overview
 
@@ -129,4 +129,4 @@ dotnet list package --vulnerable
 | Local auth fails | Run `az login` or `azd auth login` |
 | Port 8080 in use | Change in `launchSettings.json` |
 
-See `backend/AGENTS.md` for code examples and implementation patterns.
+For AI-assisted development, see `.github/skills/writing-csharp-code/SKILL.md` and `.github/skills/implementing-chat-streaming/SKILL.md`.

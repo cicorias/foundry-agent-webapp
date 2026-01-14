@@ -1,6 +1,6 @@
 # Azure Developer CLI Hooks
 
-**Context**: See `.github/copilot-instructions.md` and `deployment/AGENTS.md` for overall architecture.
+**AI Assistance**: See `.github/skills/deploying-to-azure/SKILL.md` for deployment patterns.
 
 ## Hook Execution Order
 

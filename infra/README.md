@@ -1,6 +1,6 @@
 # Infrastructure - Azure Bicep Templates
 
-**Technical details**: See `infra/AGENTS.md` for Bicep patterns and code examples.
+**AI Assistance**: See `.github/skills/writing-bicep-templates/SKILL.md` for Bicep patterns.
 
 ## Overview
 
@@ -185,4 +185,4 @@ az deployment sub what-if \
   --parameters main.parameters.json
 ```
 
-See `infra/AGENTS.md` for complete Bicep code examples and patterns.
+For AI-assisted development, see `.github/skills/writing-bicep-templates/SKILL.md`.

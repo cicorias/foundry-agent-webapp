@@ -1,6 +1,6 @@
 # Deployment Directory
 
-**Context**: See `.github/copilot-instructions.md` for commands and workflows. See `deployment/AGENTS.md` for technical implementation.
+**AI Assistance**: See `.github/skills/deploying-to-azure/SKILL.md` for deployment patterns.
 
 ## Structure
 
@@ -68,4 +68,4 @@ For complete commands and workflows, see `.github/copilot-instructions.md` → D
 - Local Docker (faster, recommended): Uses installed Docker daemon
 - ACR cloud build (fallback): Uploads context to ACR for cloud build
 
-See `AGENTS.md` for complete Dockerfile and build module implementation.
+For AI-assisted development, see `.github/skills/deploying-to-azure/SKILL.md`.

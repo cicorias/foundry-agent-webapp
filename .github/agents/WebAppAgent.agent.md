@@ -14,160 +14,114 @@ model: Claude Opus 4.5 (copilot)
 
 Avoid token waste by understanding what lives where:
 
-1. **copilot-instructions.md** (always loaded) → Architecture, workflows, deployment commands, critical patterns
-2. **AGENTS.md files** (loaded on-demand) → Implementation details when touching backend/, frontend/, infra/, deployment/
-3. **This file** → SDK research patterns, MCP tool usage, testing workflows
+1. **copilot-instructions.md** (always loaded) → Architecture, essential rules
+2. **Skills** (loaded on-demand) → Deployment, SDK research, testing, coding standards + project-specific details
+3. **This file** → Agent mode configuration, MCP tool strategy, project context
 
-**Your role**: Research SDKs, validate with tests, connect documentation sources. Don't duplicate what's in copilot-instructions.md.
+**Your role**: Research SDKs, validate with tests, connect documentation sources.
 
-## Azure AI Agent SDK Research Pattern
+## Available Skills
 
-**CRITICAL**: Don't guess SDK usage. Follow this research workflow:
+Skills provide detailed guidance and delegation patterns on-demand:
 
-### 1. Search Official Documentation (Start here)
+| Skill | Includes Subagent Pattern |
+|-------|---------------------------|
+| deploying-to-azure | ✅ Log analysis delegation |
+| researching-azure-ai-sdk | ✅ Multi-repo research delegation |
+| testing-with-playwright | ✅ Screenshot/accessibility delegation |
+| writing-csharp-code | - |
+| writing-typescript-code | - |
+| writing-bicep-templates | - |
+| implementing-chat-streaming | - |
+| troubleshooting-authentication | - |
 
-**Official SDK Repository**: https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/ai/Azure.AI.Agents.Persistent
+## Subagent Delegation Strategy
 
-Use available MCP tools to search Microsoft Learn documentation for Azure AI Agents Persistent SDK features, patterns, and examples.
+**Core Principle**: Delegate context-heavy operations to subagents to preserve parent context window.
 
-### 2. Check Semantic Kernel Samples (Complementary patterns)
+### When to Delegate to Subagent
 
-**Repository**: https://github.com/microsoft/semantic-kernel
+| Delegate | Keep Inline |
+|----------|-------------|
+| Multi-file research (5+ files) | Single file reads |
+| Screenshot capture/analysis | Console log checks |
+| Multi-repo code search | Local grep/search |
+| Full deployment log analysis | Quick status checks |
+| Complex SDK pattern research | Known API calls |
+| Accessibility snapshot analysis | Simple DOM queries |
 
-**Relevant paths**:
-- `dotnet/samples/GettingStartedWithAgents/AzureAIAgent/` - Getting started examples
-- `dotnet/samples/Concepts/Agents/` - Advanced patterns (Step##_*.cs files)
+### Context Budget Guidelines
 
-Semantic Kernel provides rich examples of Azure AI Agent patterns using its abstraction layer. Use available GitHub MCP tools to search and browse these samples for proven implementation patterns.
+| Operation | Token Cost | Strategy |
+|-----------|------------|----------|
+| Screenshot | 2000-5000 | Always delegate |
+| Accessibility snapshot | 500-2000 | Delegate if > 1 page |
+| Full file read (large) | 1000+ | Delegate research |
+| Multi-repo search | 2000+ | Always delegate |
+| Console logs | 100-300 | Keep inline |
+| Network summary | 50-100 | Keep inline |
 
-**Note**: Semantic Kernel abstracts agent operations through its framework. When adapting patterns, translate SK abstractions to direct Azure.AI.Agents.Persistent SDK types.
+### Subagent Result Handling
 
-### 3. Azure AI Foundry Agent Samples
+Subagent returns a single message. Parse and use:
+1. **Quote key findings** in your response to user
+2. **Use file paths/line numbers** returned for targeted edits
+3. **Apply suggested patterns** directly without re-reading sources
 
-**Official Samples Repository**: https://github.com/azure-ai-foundry/foundry-samples
-
-**Key paths**:
-- `samples/microsoft/csharp/getting-started-agents/` - C# quickstart samples
-- `samples/microsoft/python/getting-started-agents/` - Python quickstart samples
-- `samples/microsoft/typescript/getting-started-agents/` - TypeScript quickstart samples
-- `samples/microsoft/data/` - Sample data files (product info, etc.)
-
-These are the official Azure AI Foundry Agent Service samples showing function calling, file search, code interpreter, and streaming patterns. Use available GitHub MCP tools to explore language-specific implementations.
-
-**Additional UI Sample**: https://github.com/Azure-Samples/get-started-with-ai-agents
-- React-based chat UI components and UX patterns
-- **Note**: Backend uses Node.js - focus on frontend patterns only
-
-### 4. Broad Code Search (Last resort)
-
-Use available GitHub search tools to find usage examples of specific Azure.AI.Agents.Persistent types across public repositories when official documentation is insufficient.
-
-### Current SDK Version
-
-**Package**: `Azure.AI.Agents.Persistent` v1.2.0-beta.6 (pinned in WebApp.Api.csproj)
-
-**Why pinned**: Beta SDK with evolving API surface. Upgrade deliberately to avoid breaking changes.
-
-**Resources**:
-- **NuGet**: https://www.nuget.org/packages/Azure.AI.Agents.Persistent
-- **SDK Source**: https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/ai/Azure.AI.Agents.Persistent
-- **API Reference**: https://learn.microsoft.com/en-us/dotnet/api/azure.ai.agents.persistent
-- **Official Samples**: https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/ai/Azure.AI.Agents.Persistent/samples
-
-**Key sample files**:
-- Function calling with streaming
-- MCP tool integration  
-- File upload and vector search
-- Async patterns
-
-### Microsoft Agent Framework (Higher-level abstraction)
-
-**Package**: `Microsoft.Agents.AI.AzureAI` v1.0.0-preview (also in project)
-
-The Microsoft Agent Framework provides a higher-level abstraction over the Azure AI Foundry Agent Service, offering simplified agent creation and orchestration patterns.
-
-**Resources**:
-- **NuGet**: https://www.nuget.org/packages/Microsoft.Agents.AI.AzureAI
-- **Documentation**: https://learn.microsoft.com/en-us/agent-framework/user-guide/agents/agent-types/azure-ai-foundry-agent
-- **GitHub Samples**: https://github.com/microsoft/agent-framework/tree/main/dotnet/samples
-- **Quickstart**: https://learn.microsoft.com/en-us/agent-framework/tutorials/quick-start
-
-**When to use**:
-- Need unified agent abstraction across multiple AI services
-- Want simplified agent lifecycle management
-- Building multi-agent orchestration scenarios
-- Prefer higher-level `AIAgent` abstractions over direct SDK calls
-
-**Relationship**: Agent Framework wraps `PersistentAgentsClient` and provides `CreateAIAgentAsync()` extension methods for simplified agent creation. Both can coexist in the same project.
-
-See backend/AGENTS.md for full implementation patterns (credentials, streaming, error handling, cancellation tokens).
-
-## Testing with Playwright MCP
-
-**CRITICAL**: Always test changes before completion.
-
-### Testing Priority (Token efficiency)
-
-1. **Console logs** - State transitions, errors (0 tokens)
-2. **Network tab** - API calls, status codes (minimal tokens)
-3. **Accessibility snapshot** - DOM structure (low tokens)
-4. **Screenshots** - Visual verification (high tokens - only when essential)
-
-### Workflow
-
-```powershell
-# Start servers
-.\deployment\scripts\start-local-dev.ps1
-
-# Then use Playwright MCP:
-# 1. Navigate to http://localhost:5173
-# 2. Check console (before/after interactions)
-# 3. Verify network requests
-# 4. Take accessibility snapshot for DOM validation
-```
-
-### When to Test (Not optional)
-
-- After UI component or API endpoint changes
-- Before committing multi-step implementations
-- When user reports issues
-
-### Validation Checklist
-
-- [ ] Console shows expected actions (🔄 [timestamp] ACTION_TYPE)
-- [ ] No console errors/warnings
-- [ ] Network tab shows correct status codes (200/400/401/500)
-- [ ] DOM elements present in accessibility snapshot
+**Delegation patterns**: See skill docs for specific prompt templates (testing-with-playwright, researching-azure-ai-sdk, deploying-to-azure).
 
 ## MCP Tool Usage Strategy
 
 ### Documentation Research
 
-Use available Microsoft Learn documentation tools to:
-1. **Search** Microsoft Learn for Azure AI Agents SDK topics
-2. **Fetch** complete documentation pages when search results need more depth
-3. Find official samples, API references, and best practices
+Use Microsoft Learn documentation tools to search and fetch Azure AI SDK topics.
+
+**Delegation trigger**: Research requiring 3+ sources → delegate to subagent.
 
 ### GitHub Repository Access
 
-Use available GitHub MCP tools to:
-1. **Search code** across repositories for implementation examples
-2. **Browse files** in specific paths for sample code
-3. Access repositories: Azure SDK, Semantic Kernel, Azure Samples
+Use GitHub MCP tools to search code and browse files across Azure SDK, Semantic Kernel, Azure Samples.
+
+**Delegation trigger**: Multi-repo search or 5+ file reads → delegate to subagent.
 
 ### Browser Testing
 
-Use available browser automation tools to:
-1. Navigate to http://localhost:5173 after starting local dev
-2. Check console logs for state transitions and errors
-3. Inspect network requests for API validation
-4. Capture accessibility snapshots for DOM structure
-5. Take screenshots only when visual verification is essential
+Use Playwright tools in priority order: console logs → network → accessibility → screenshots.
+
+**Delegation trigger**: Multi-page testing, screenshots, or accessibility audits → delegate to subagent.
+
+## Development Workflow
+
+**Both servers support live reloading** - no restarts needed:
+
+| Server | Task | Hot Reload |
+|--------|------|------------|
+| Backend | `Backend: ASP.NET Core API` | Auto-recompiles on save |
+| Frontend | `Frontend: React Vite` | HMR - instant browser updates |
+
+**Compound task**: `Start Dev (VS Code Terminals)` starts both in parallel.
+
+**Workflow**: Edit code → Save → Check terminal for errors → Test in browser
 
 ## Project-Specific Context
 
 **Architecture**: Single-conversation UI (full-width chat, no sidebar/history)
 **State**: Redux-style via React Context + useReducer with dev logging
+
+### SDK Details
+
+**Main Package**: `Azure.AI.Projects` v1.2.0-beta.5  
+**Sub-namespaces**: `Azure.AI.Agents.Persistent`, `Azure.AI.Projects.OpenAI`, `OpenAI.Responses`  
+
+**Key Types**:
+- `AIProjectClient` → Main entry point, get via `new AIProjectClient(new Uri(endpoint), credential)`
+- `ProjectResponsesClient` → Responses API, get via `projectClient.OpenAI.GetProjectResponsesClientForAgent()`
+- `ProjectConversation` → Conversation state, get via `projectClient.OpenAI.Conversations.CreateProjectConversation()`
+- `StreamingResponseOutputTextDeltaUpdate` → Text delta chunks during streaming
+- `StreamingResponseOutputItemDoneUpdate` → Item completion with annotations
+- `AgentVersion` → Agent metadata including name and ID
+
+**Streaming Pattern**: `CreateResponseStreamingAsync()` returns `IAsyncEnumerable<StreamingUpdate>`, backend yields `StreamChunk` containing either text deltas or annotations for SSE.
 
 ### AI Agent Service Configuration
 

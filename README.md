@@ -92,13 +92,28 @@ See [deployment/hooks/README.md](deployment/hooks/README.md#app-registration-pol
 The workspace includes optimized VS Code configuration for AI-assisted development:
 
 ### Tasks (`.vscode/tasks.json`)
-- **Start Local Development** - Runs both frontend and backend servers simultaneously
-- **Start Backend (ASP.NET Core)** - `dotnet run` with watch mode (port 8080)
-- **Start Frontend (Vite)** - `npm run dev` with HMR (port 5173)
+
+| Task | Description | Port |
+|------|-------------|------|
+| `Backend: ASP.NET Core API` | `dotnet watch run` with hot reload | 8080 |
+| `Frontend: React Vite` | `npm run dev` with HMR | 5173 |
+| `Start Dev (VS Code Terminals)` | Starts both in parallel (default build task) | - |
+| `Install Frontend Dependencies` | `npm install --legacy-peer-deps` | - |
+
+**Hot Reload Workflow**:
+- **Backend**: Edit C# → Save → .NET auto-recompiles → Check terminal for errors
+- **Frontend**: Edit TypeScript/React → Save → Browser updates instantly (HMR)
+- **No restarts needed** - just edit, save, and test
+
+**AI Agent Benefits**: Server logs are visible in VS Code terminals, allowing AI agents to:
+- See compilation errors and warnings
+- Monitor request handling
+- Debug issues without screenshots
 
 ### Settings (`.vscode/settings.json`)
-- **GitHub Copilot** - Enabled with custom agent mode support
-- **Instruction Files** - Loads `.github/instructions/*.md` and `AGENTS.md` hierarchy
+- **GitHub Copilot** - Enabled with Agent Skills (`chat.useAgentSkills: true`)
+- **Skills** - On-demand loading from `.github/skills/` for efficient context
+- **Terminal Scrollback** - Limited to 500 lines to prevent overwhelming AI context
 - **Markdown Linting** - Disabled to prevent noise from instruction files
 
 ## Configuration
@@ -136,22 +151,36 @@ azd env set AI_AGENT_ID <agent-name>
 
 ## Development Workflow
 
+### Option 1: VS Code Tasks (Recommended for AI-assisted development)
 ```powershell
-# Start local development (first time or daily)
+# Run the compound task via Command Palette (Ctrl+Shift+P):
+# "Tasks: Run Task" → "Start Dev (VS Code Terminals)"
+# Or press Ctrl+Shift+B (default build task)
+
+# Servers run in VS Code terminal panel with visible logs
+# AI agents can read logs via get_terminal_output
+```
+
+### Option 2: PowerShell Script
+```powershell
+# Start local development (spawns separate terminal windows)
 .\deployment\scripts\start-local-dev.ps1
+```
 
-# Work with instant feedback:
-# - React: Hot Module Replacement (HMR)
-# - C#: Watch mode recompilation
-# - Test at http://localhost:5173
+### Hot Reload
+- **React**: Hot Module Replacement (HMR) - instant browser updates
+- **C#**: Watch mode - auto-recompiles on save, check terminal for errors
+- **Test at**: http://localhost:5173
 
+### Deploy
+```powershell
 # Deploy code changes to Azure
 .\deployment\scripts\deploy.ps1  # 3-5 minutes
 ```
 
 ## Architecture
 
-**Frontend**: React 18 + TypeScript + Vite  
+**Frontend**: React 19 + TypeScript + Vite  
 **Backend**: ASP.NET Core 9 Minimal APIs  
 **Authentication**: Microsoft Entra ID (PKCE flow)  
 **AI Integration**: Azure AI Foundry Agent Service  
@@ -177,12 +206,25 @@ azd env set AI_AGENT_ID <agent-name>
 
 ## Documentation
 
-For contributors and AI agents, detailed technical documentation is available:
-- `.github/copilot-instructions.md` - Architecture overview and cross-cutting patterns
-- `backend/AGENTS.md` - ASP.NET Core implementation patterns
-- `frontend/AGENTS.md` - React and MSAL integration patterns
-- `infra/AGENTS.md` - Bicep infrastructure patterns
-- `deployment/AGENTS.md` - Deployment and Docker patterns
+### For Developers
+- `backend/README.md` - ASP.NET Core API setup and configuration
+- `frontend/README.md` - React frontend development (if present)
+- `infra/README.md` - Azure infrastructure overview
+- `deployment/README.md` - Deployment scripts and hooks
+
+### For AI Assistants (GitHub Copilot)
+This repository uses VS Code's Agent Skills feature for on-demand context loading:
+
+- `.github/copilot-instructions.md` - Architecture overview (always loaded)
+- `.github/skills/` - Domain-specific guidance loaded when relevant:
+  - `deploying-to-azure` - Deployment commands and troubleshooting
+  - `writing-csharp-code` - C#/ASP.NET Core patterns
+  - `writing-typescript-code` - TypeScript/React patterns
+  - `writing-bicep-templates` - Bicep infrastructure patterns
+  - `implementing-chat-streaming` - SSE streaming patterns
+  - `troubleshooting-authentication` - MSAL/JWT debugging
+  - `researching-azure-ai-sdk` - SDK research workflow
+  - `testing-with-playwright` - Browser testing workflow
 
 ## Azure Resources Provisioned
 
@@ -210,6 +252,11 @@ This template deploys the following Azure resources:
 │   ├── scripts/                  # User commands
 │   └── docker/                   # Multi-stage Dockerfile
 └── .github/
-    ├── copilot-instructions.md   # Architecture patterns
-    └── instructions/             # Language-specific standards
+    ├── copilot-instructions.md   # Architecture overview (always loaded)
+    ├── skills/                   # On-demand AI assistant guidance
+    │   ├── deploying-to-azure/
+    │   ├── writing-csharp-code/
+    │   ├── writing-typescript-code/
+    │   └── ...                   # 8 skills total
+    └── agents/                   # Agent mode definitions
 ```

@@ -29,6 +29,8 @@
   gap: 4px;
   align-items: center;
   color: var(--colorNeutralForeground1);
+  white-space: nowrap;
+  flex-wrap: nowrap;
 }
 
 .badge:hover {
